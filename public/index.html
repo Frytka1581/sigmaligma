@@ -1,63 +1,26 @@
 <!DOCTYPE html>
-<html lang="pl">
+<html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>Blef Online</title>
-<script src="/socket.io/socket.io.js"></script>
-<style>
-body { font-family: sans-serif; text-align: center; margin-top: 50px; }
-#game { display:none; }
-</style>
+  <meta charset="UTF-8">
+  <title>Blef Online</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<h1>Blef Online</h1>
-
-<div id="lobby">
+  <h1>Blef Online</h1>
+  <div id="lobby">
     <input id="name" placeholder="Twoje imię">
     <input id="room" placeholder="ID pokoju">
-    <button id="create">Stwórz pokój</button>
-    <button id="join">Dołącz do pokoju</button>
+    <button id="join">Dołącz</button>
+  </div>
+  <div id="game" style="display:none;">
+    <h2>Gracze:</h2>
     <ul id="players"></ul>
-    <button id="start">Start gry</button>
-</div>
+    <button id="start">Rozpocznij grę</button>
+    <h2>Twoje karty:</h2>
+    <ul id="hand"></ul>
+  </div>
 
-<div id="game">
-    <h2>Gra rozpoczęta!</h2>
-    <div id="cards"></div>
-</div>
-
-<script>
-const socket = io();
-
-const nameInput = document.getElementById('name');
-const roomInput = document.getElementById('room');
-const playersList = document.getElementById('players');
-const lobbyDiv = document.getElementById('lobby');
-const gameDiv = document.getElementById('game');
-const cardsDiv = document.getElementById('cards');
-
-document.getElementById('create').onclick = () => {
-    socket.emit('createRoom', roomInput.value, nameInput.value);
-};
-document.getElementById('join').onclick = () => {
-    socket.emit('joinRoom', roomInput.value, nameInput.value);
-};
-document.getElementById('start').onclick = () => {
-    socket.emit('startGame', roomInput.value);
-};
-
-socket.on('roomCreated', roomId => alert('Pokój stworzony: ' + roomId));
-socket.on('roomExists', () => alert('Pokój już istnieje!'));
-socket.on('roomNotFound', () => alert('Pokój nie istnieje!'));
-socket.on('updatePlayers', players => {
-    playersList.innerHTML = '';
-    players.forEach(p => playersList.innerHTML += `<li>${p.name}</li>`);
-});
-socket.on('gameStarted', deck => {
-    lobbyDiv.style.display = 'none';
-    gameDiv.style.display = 'block';
-    cardsDiv.innerHTML = 'Twoje karty: ' + deck.join(', ');
-});
-</script>
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="client.js"></script>
 </body>
 </html>

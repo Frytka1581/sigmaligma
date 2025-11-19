@@ -1,56 +1,57 @@
 const express = require('express');
-const http = require('http');
-const { Server } = require('socket.io');
-
 const app = express();
-const server = http.createServer(app);
-const io = new Server(server);
+const http = require('http').createServer(app);
+const io = require('socket.io')(http);
 
-app.use(express.static('public')); // public folder z front-endem
+const PORT = process.env.PORT || 3000;
 
-const rooms = {};
+app.use(express.static('public'));
+
+let rooms = {}; // { roomId: { players: [], hands: {}, deck: [], currentTurn: 0 } }
+
+function shuffleDeck() {
+  const suits = ['♠','♥','♦','♣'];
+  const ranks = ['A','2','3','4','5','6','7','8','9','10','J','Q','K'];
+  let deck = [];
+  for (let s of suits) for (let r of ranks) deck.push(r+s);
+  return deck.sort(() => Math.random() - 0.5);
+}
 
 io.on('connection', (socket) => {
-    console.log('Nowy gracz:', socket.id);
+  console.log('New user connected:', socket.id);
 
-    socket.on('createRoom', (roomId, playerName) => {
-        if (rooms[roomId]) {
-            socket.emit('roomExists');
-            return;
-        }
-        rooms[roomId] = { players: [{ id: socket.id, name: playerName }], gameStarted: false, deck: [] };
-        socket.join(roomId);
-        socket.emit('roomCreated', roomId);
-        io.to(roomId).emit('updatePlayers', rooms[roomId].players);
-    });
+  socket.on('joinRoom', (roomId, playerName) => {
+    if (!rooms[roomId]) rooms[roomId] = { players: [], hands: {}, deck: [], currentTurn: 0 };
+    const room = rooms[roomId];
+    room.players.push({ id: socket.id, name: playerName });
+    socket.join(roomId);
+    io.to(roomId).emit('updatePlayers', room.players);
+  });
 
-    socket.on('joinRoom', (roomId, playerName) => {
-        const room = rooms[roomId];
-        if (!room) {
-            socket.emit('roomNotFound');
-            return;
-        }
-        room.players.push({ id: socket.id, name: playerName });
-        socket.join(roomId);
-        io.to(roomId).emit('updatePlayers', room.players);
-    });
+  socket.on('startGame', (roomId) => {
+    const room = rooms[roomId];
+    room.deck = shuffleDeck();
+    room.hands = {};
+    room.players.forEach(p => room.hands[p.id] = []);
+    let i = 0;
+    while(room.deck.length) {
+      const card = room.deck.pop();
+      const playerId = room.players[i % room.players.length].id;
+      room.hands[playerId].push(card);
+      i++;
+    }
+    io.to(roomId).emit('gameStarted', room.hands);
+  });
 
-    socket.on('startGame', (roomId) => {
-        const room = rooms[roomId];
-        if (!room) return;
-        room.gameStarted = true;
-        room.deck = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
-        io.to(roomId).emit('gameStarted', room.deck);
-    });
-
-    socket.on('disconnect', () => {
-        for (const roomId in rooms) {
-            const room = rooms[roomId];
-            room.players = room.players.filter(p => p.id !== socket.id);
-            io.to(roomId).emit('updatePlayers', room.players);
-            if (room.players.length === 0) delete rooms[roomId];
-        }
-    });
+  socket.on('disconnect', () => {
+    console.log('User disconnected:', socket.id);
+    for (const roomId in rooms) {
+      rooms[roomId].players = rooms[roomId].players.filter(p => p.id !== socket.id);
+      io.to(roomId).emit('updatePlayers', rooms[roomId].players);
+    }
+  });
 });
 
-server.listen(process.env.PORT || 3000, () => console.log('Serwer działa'));
+http.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});
