@@ -1,0 +1,18 @@
+body { font-family: Arial, sans-serif; background: #f0f0f0; color: #333; margin: 0; padding: 20px; }
+.container { max-width: 600px; margin: 0 auto; text-align: center; }
+header { background: #4CAF50; color: white; padding: 20px; border-radius: 10px; }
+h1 { margin: 0; font-size: 2em; }
+h2 { color: #4CAF50; }
+.highlight { background: #E8F5E8; padding: 10px; border-radius: 5px; }
+.input-group { margin: 20px 0; }
+input, button { padding: 10px; margin: 5px; border: 1px solid #ccc; border-radius: 5px; }
+button { background: #4CAF50; color: white; cursor: pointer; }
+button:hover { background: #45a049; }
+.modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; }
+.modal-content { background: white; padding: 20px; border-radius: 10px; max-width: 400px; }
+.hidden { display: none; }
+.game-body { background: #333; color: white; }
+.lobby, #gameBoard { padding: 20px; }
+#hand { display: flex; justify-content: center; margin: 20px 0; }
+.card { width: 50px; height: 70px; background: white; color: black; border: 1px solid #ccc; margin: 0 2px; display: flex; align-items: center; justify-content: center; border-radius: 5px; }
+#controls button { margin: 5px; background: #4CAF50; }

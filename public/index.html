@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Blef - Polish Card Game</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Blef</h1>
+      <p>Polish Card Game</p>
+    </header>
+    <div class="welcome">
+      <p><span class="highlight">Play the classic Polish bluffing game online</span></p>
+      <h2>Welcome to Blef</h2>
+      <p>Master the art of poker hands and deception. Join a game or create your own room to play with friends.</p>
+      <div class="input-group">
+        <label>Enter your name to get started</label>
+        <input type="text" id="nameInput" placeholder="Your name">
+        <button id="continueBtn">Continue</button>
+      </div>
+    </div>
+    <div id="roomModal" class="modal hidden">
+      <div class="modal-content">
+        <h3>Create New Game Room and invite friends to join</h3>
+        <label>Room Name</label>
+        <input type="text" id="roomName" placeholder="e.g., Friday Night Blef">
+        <label>Max Players</label>
+        <input type="number" id="maxPlayers" min="2" max="6" value="6">
+        <label>Card Limit (Elimination)</label>
+        <input type="range" id="cardLimit" min="4" max="10" value="6">
+        <p class="help">Players are eliminated when they reach this many cards</p>
+        <button id="createRoom">Create Room</button>
+      </div>
+    </div>
+    <div id="joinSection" class="hidden">
+      <input type="text" id="searchRooms" placeholder="Search rooms by name or code">
+      <button id="createNewBtn">+ Create New Game</button>
+    </div>
+  </div>
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    const socket = io();
+    let playerName = '';
+    document.getElementById('continueBtn').onclick = () => {
+      playerName = document.getElementById('nameInput').value.trim();
+      if (!playerName) return alert('Enter a name');
+      document.querySelector('.welcome').classList.add('hidden');
+      document.getElementById('joinSection').classList.remove('hidden');
+    };
+    document.getElementById('createNewBtn').onclick = () => {
+      document.getElementById('roomModal').classList.remove('hidden');
+    };
+    document.getElementById('createRoom').onclick = () => {
+      const room = document.getElementById('roomName').value.trim();
+      const maxPlayers = parseInt(document.getElementById('maxPlayers').value);
+      const cardLimit = parseInt(document.getElementById('cardLimit').value);
+      if (!room) return alert('Enter room name');
+      socket.emit('joinRoom', { name: playerName, room, maxPlayers, cardLimit });
+    };
+    // Listen for joined
+    socket.on('joined', ({ room }) => {
+      window.location.href = `game.html?room=${room}&name=${playerName}`;
+    });
+    socket.on('error', (msg) => alert(msg));
+  </script>
+</body>
+</html>

@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Blef Game</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="game-body">
+  <header>
+    <h1>Blef</h1>
+    <p>Master the art of poker hands and deception. Join a game or create your own room to play with friends.</p>
+  </header>
+  <div class="game-container">
+    <div id="lobby" class="lobby">
+      <h2>Room: <span id="roomName"></span></h2>
+      <div id="playersList"></div>
+      <p>Waiting for players...</p>
+    </div>
+    <div id="gameBoard" class="hidden">
+      <div id="hand"></div>
+      <div id="bidHistory"></div>
+      <div id="controls">
+        <!-- Dynamic buttons: Bid options, Challenge -->
+      </div>
+      <div id="pool">Pool: <span id="poolSize">0</span> cards</div>
+    </div>
+  </div>
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="script.js"></script>
+  <script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const room = urlParams.get('room');
+    const name = urlParams.get('name');
+    const socket = io();
+    socket.emit('joinRoom', { name, room }); // Re-join for updates
+    // Handlers in script.js
+  </script>
+</body>
+</html>
